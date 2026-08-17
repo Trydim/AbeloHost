@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Controller;
+namespace Kernel\Controller;
 
 class BlogController
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace View;
+namespace Kernel\View;
 
 class View
 {

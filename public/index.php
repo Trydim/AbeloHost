@@ -6,4 +6,4 @@ use Kernel\Kernel;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-(new Kernel)->create();
+Kernel::getInstance()->create();

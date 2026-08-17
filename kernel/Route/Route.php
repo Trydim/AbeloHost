@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Route;
+namespace Kernel\Route;
 
 final class Route
 {
