@@ -15,6 +15,11 @@ services:
       DB_DATABASE: ${MYSQL_DATABASE:-abelohost}
       DB_USERNAME: ${MYSQL_USER:-abelohost}
       DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
+      XDEBUG_START_WITH_REQUEST: ${XDEBUG_START_WITH_REQUEST:-yes}
+      XDEBUG_CLIENT_HOST: ${XDEBUG_CLIENT_HOST:-host.docker.internal}
+      XDEBUG_CLIENT_PORT: ${XDEBUG_CLIENT_PORT:-9003}
+      PHP_IDE_CONFIG: ${PHP_IDE_CONFIG:-serverName=abelohost}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -36,12 +41,13 @@ services:
       DB_DATABASE: ${MYSQL_DATABASE:-abelohost}
       DB_USERNAME: ${MYSQL_USER:-abelohost}
       DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      XDEBUG_MODE: "off"
     depends_on:
       db:
         condition: service_healthy
     command: >-
       sh -ec "composer install --no-interaction --prefer-dist --optimize-autoloader
-      && php database/migrate.php && php database/seeders/seed.php"
+      && php database/migrations/migrate.php && php database/seeders/seed.php"
     restart: "no"
 
   nginx:
