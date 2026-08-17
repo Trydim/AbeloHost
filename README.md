@@ -37,3 +37,12 @@ PHP 8.5
 
 Без `.env` Xdebug загружен, но отключен (режиме `off`).
 Чтобы активировать отладку, раскомментируйте режимы Xdebug и перезапустите контейнер: `docker compose up -d`.
+
+## База данных и тестовые данные
+
+```bash
+docker compose exec php php database//migrate.php
+docker compose exec php php database/seeders/seed.php
+```
+
+Сидер идемпотентен: его можно запускать повторно. Он добавляет категории и статьи с привязками к категориям.

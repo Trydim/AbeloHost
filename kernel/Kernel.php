@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Kernel;
 
+
 use Kernel\Container\Container;
+use Kernel\Controller\ErrorController;
 use Kernel\DB\Database;
+use Kernel\Http\Request;
 use Kernel\Route\Route;
 use PDO;
 use RuntimeException;
@@ -33,15 +36,30 @@ final class Kernel
         return self::$instance ??= new self();
     }
 
+    /**
+     * @throws \ReflectionException
+     */
+    public function get(string $id): object
+    {
+        return $this->container->get($id);
+    }
+
     public function create(): void
     {
         try {
-            $this->router->dispatch('GET', '/');
+            $request = $this->get(Request::class);
+
+            $result = $this->router->dispatch($request->method(), $request->path());
+
+            if (!$result) {
+                $controller = $this->get(ErrorController::class);
+                $controller->pageNotFound();
+            }
         } catch (Throwable $exception) {
             error_log((string) $exception);
 
-            http_response_code(500);
-            echo 'Server error.';
+            $controller = $this->get(ErrorController::class);
+            $controller->pageServerError();
         }
     }
 
@@ -49,9 +67,11 @@ final class Kernel
     {
         $this->container->singleton(
             PDO::class,
-            function () {
-                return Database::connect();
-            }
+            static fn (): PDO => Database::connect(),
+        );
+        $this->container->singleton(
+            Request::class,
+            static fn (): Request => Request::fromGlobals(),
         );
 
         return $this;
