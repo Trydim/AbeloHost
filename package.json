@@ -1,0 +1,12 @@
+{
+  "name": "abelohost-assets",
+  "private": true,
+  "scripts": {
+    "build:css": "sass --load-path=node_modules src/scss/main.scss public/assets/css/main.css --style=compressed --no-source-map",
+    "watch:css": "sass --watch --load-path=node_modules src/scss/main.scss:public/assets/css/main.css --style=expanded"
+  },
+  "devDependencies": {
+    "normalize.css": "^8.0.1",
+    "sass": "^1.80.0"
+  }
+}

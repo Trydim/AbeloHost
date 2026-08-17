@@ -1,0 +1,29 @@
+{
+  "name": "trydim/abelohost",
+  "description": "Blog on PHP",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "TryDim",
+      "email": "trydim85@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "smarty/smarty": "^5.8.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kernel\\": "kernel/"
+    },
+    "files": [
+      "kernel/Helper/func.php"
+    ]
+  },
+  "scripts": {
+    "docker:up": [
+      "docker compose up"
+    ]
+  }
+}
