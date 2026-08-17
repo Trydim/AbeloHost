@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Kernel;
+
 final class Kernel
 {
     function __construct()
@@ -11,6 +13,11 @@ final class Kernel
 
     public function create(): void
     {
-      echo 'hello world';
+      $pdo = \Kernel\DB\Database::connect();
+
+      $result = $pdo->query('SELECT * FROM `categories`');
+      var_dump($result->fetchAll());
+      $result = $pdo->query('SELECT * FROM `posts`');
+      var_dump($result->fetchAll());
     }
 }

@@ -39,4 +39,17 @@ src/                              # Frontend source directory
 ```bash
 # Full local startup
 docker compose up --build -d
+
+# Status and logs
+docker compose ps
+docker compose logs -f php
+
+# PHP dependencies and checks
+docker compose exec php composer validate --strict
+docker compose exec php composer dump-autoload --optimize
+docker compose exec php sh -c "find kernel database public routes -name '*.php' -print0 | xargs -0 -n1 php -l"
+
+# Database
+docker compose exec php php database/migrations/migrate.php
+docker compose exec php php database/seeders/seed.php
 ```
