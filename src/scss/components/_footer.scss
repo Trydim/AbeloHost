@@ -1,0 +1,24 @@
+@use "../abstract/variables" as *;
+
+.footer {
+  width: min(calc(100% - 100px), $frame-width);
+  margin: auto auto 2rem;
+  color: $white;
+  background: $brand-color;
+  text-align: center;
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    min-height: 10rem;
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .footer {
+    width: calc(100% - $desktop-gutter);
+  }
+}
+

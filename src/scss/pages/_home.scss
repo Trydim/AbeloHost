@@ -1,0 +1,27 @@
+@use "../abstract/variables" as *;
+@use "../mixins/func";
+
+.category-section {
+  margin: 2.5rem 0 2rem;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  h2 {
+    font-size: func.rem(14);
+    text-transform: uppercase;
+  }
+}
+
+.section-heading__link {
+  color: $brand-color;
+  font-size: func.rem(12);
+  text-decoration: underline;
+}
+
+.section-heading__link:hover {
+  color: $brand-color-dark;
+}

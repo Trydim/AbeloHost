@@ -1,0 +1,74 @@
+@use "../abstract/variables" as *;
+@use "../mixins/func";
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.post-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-card__image-link {
+  display: block;
+  border-radius: $border-radius;
+  overflow: hidden;
+}
+
+.post-card__image {
+  width: 100%;
+  height: 208px;
+  object-fit: cover;
+  transition: transform .25s ease;
+
+  &.placeholder {
+    background: linear-gradient(135deg, #d8e3e7, #b8cbd1);
+  }
+}
+
+.post-card:hover .post-card__image {
+  transform: scale(1.025);
+}
+
+.post-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 200px;
+  padding: 1rem 1rem 0;
+  font-size: func.rem(14);
+}
+
+.post-card__title {
+  color: $brand-color;
+  font-size: 1rem;
+
+  a:hover {
+    color: $brand-color-dark;
+    text-decoration: underline;
+  }
+}
+
+.post-card__meta {
+  display: block;
+  color: $font-muted;
+  font-size: func.rem(12);
+}
+
+.post-card__description {
+  color: $font-muted;
+}
+
+.post-card__read-more {
+  display: block;
+  margin-top: 1rem;
+  color: $brand-color;
+  text-decoration: underline;
+
+  &:hover {
+    color: $brand-color-dark;
+  }
+}

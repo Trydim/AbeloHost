@@ -1,0 +1,24 @@
+@use "../abstract/variables" as *;
+@use "../mixins/func";
+
+.container {
+  width: min(calc(100% - $desktop-gutter), $container-width);
+  margin: 0 auto;
+}
+
+.eyebrow {
+  color: $brand-color;
+  font-size: func.rem(12);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  padding: 2rem;
+  border: 1px dashed #dfe5e7;
+  border-radius: $border-radius;
+  background: $bg-main;
+  text-align: center;
+  color: $font-muted;
+}
+

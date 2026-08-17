@@ -14,7 +14,7 @@ final class Database
     $port     = self::environment('DB_PORT', '3306');
     $database = self::environment('DB_DATABASE', 'abelohost');
     $username = self::environment('DB_USERNAME', 'abelohost');
-    $password = self::environment('DB_PASSWORD', 'secter');
+    $password = self::environment('DB_PASSWORD', 'secret');
 
     return new PDO(
       "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4",

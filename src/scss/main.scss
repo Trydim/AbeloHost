@@ -1,4 +1,13 @@
-* {
-  margin: 0;
-  padding: 0;
-}
+@use "abstract/variables";
+
+@use "base/reset";
+@use "base/utilities";
+
+@use "components/ui";
+
+@use "components/header";
+@use "components/footer";
+@use "components/post-card";
+@use "components/pagination";
+
+@use "pages/home";

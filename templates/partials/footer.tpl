@@ -1,5 +1,5 @@
 <footer class="footer">
-    <div class="container" style="text-align: center">
-        <p>Copyright @2026. All Rights Reserved.</p>
-    </div>
+  <div class="container">
+    <small>Copyright © {$smarty.now|date_format:'%Y'}. All Rights Reserved.</small>
+  </div>
 </footer>

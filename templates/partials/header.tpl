@@ -1,5 +1,5 @@
 <header class="header">
-    <div class="container">
-        <a href="/">Blogy.</a>
-    </div>
+  <div class="header__inner">
+    <a class="logo" href="/">Blogy.</a>
+  </div>
 </header>

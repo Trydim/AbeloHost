@@ -7,11 +7,11 @@
     <title>{$page_title|escape}</title>
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
-<body>
-    {include file='partials/header.tpl'}
-    <main class="container">
-        {block name='content'}{/block}
-    </main>
-    {include file='partials/footer.tpl'}
+<body class="layout">
+  {include file='partials/header.tpl'}
+  <main class="container">
+      {block name='content'}{/block}
+  </main>
+  {include file='partials/footer.tpl'}
 </body>
 </html>
