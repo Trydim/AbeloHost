@@ -6,4 +6,8 @@ namespace Kernel\Controller;
 
 class BlogController
 {
+    public function home(): void
+    {
+        echo 'home';
+    }
 }

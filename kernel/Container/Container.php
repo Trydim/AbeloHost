@@ -15,7 +15,7 @@ final class Container
 
     private array $instances = [];
 
-    public function set(string $id, callable $factory): void {
+    public function singleton(string $id, callable $factory): void {
         $this->factories[$id] = $factory;
     }
 
