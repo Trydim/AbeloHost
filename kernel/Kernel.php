@@ -22,10 +22,18 @@ final class Kernel
 
     private Route $router;
 
-    private function __construct()
+    public string $basePath;
+
+    private function __construct(string $basePath)
     {
+        $this->basePath  = $basePath;
         $this->container = new Container();
-        $this->router    = new Route($this->container);
+        $this->container->singleton(
+            self::class,
+            fn (Container $_): self => $this
+        );
+
+        $this->router = new Route($this->container);
 
         $this->configure();
         $this->loadRoutes();
@@ -33,7 +41,7 @@ final class Kernel
 
     public static function getInstance(): self
     {
-        return self::$instance ??= new self();
+        return self::$instance ??= new self(dirname(__DIR__));
     }
 
     /**
@@ -79,7 +87,7 @@ final class Kernel
 
     private function loadRoutes(): void
     {
-        $routes = require dirname(__DIR__) . '/routes/web.php';
+        $routes = require $this->basePath . '/routes/web.php';
 
         if (!is_callable($routes)) {
             throw new RuntimeException('The routes/web.php file must return a callable.');

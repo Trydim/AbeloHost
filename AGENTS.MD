@@ -9,16 +9,33 @@ The complete functional specification is in `Plan.md`; read it before starting a
 ## Project Map
 
 ```text
-public/index.php                 # Front controller
-kernel/                           # PHP backend, namespace Kernel\
+public/index.php                  # Front controller
 database/
   migrations/*.sql                # SQL migrations
   migrations/migrate.php          # Runner for all SQL migrations
   seeders/seed.php                # Idempotent seeder
+kernel/                           # PHP backend, namespace Kernel\
+  Kernel.php                      # Application singleton, configure() and request handling
+  Container/Container.php         # DI container: get(), singleton(), autowiring
+  Route/Route.php                 # Route registration/dispatching
+  Http/Request.php                # Request built from PHP superglobals
+  Controller/                     # Controllers
+  Actions/                        # Actions and SQL queries
+  DB/Database.php                 # PDO creation from env
+  View/View.php                   # Smarty configuration
+  Helper/func.php                 # Global app() helper
 src/                              # Frontend source directory
+templates/                        # Smarty templates
+  pages/                          # Page templates
+  layouts/                        # Base layouts
+  partials/                       # Reusable template fragments
 ```
 
 ## Backend Rules
+
+- Any change to `composer.json` requires updating `composer.lock` (`composer update --lock`) and checking `composer validate --strict`.
+- Use the `Kernel\` namespace; preserve the case of names and directories.
+
 
 ## Frontend Rules
 
