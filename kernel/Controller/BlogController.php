@@ -6,6 +6,7 @@ namespace Kernel\Controller;
 
 use Kernel\Actions\BlogActions;
 use Kernel\Http\Request;
+use Kernel\Http\Response;
 use Kernel\View\View;
 
 final class BlogController
@@ -25,26 +26,24 @@ final class BlogController
     ) {
     }
 
-    public function home(): void
+    public function home(): Response
     {
         $categories = $this->groupHomeRows(
             $this->blog->latestPostRowsByCategory(self::POSTS_PER_PAGE),
         );
 
-        $this->view->render('pages/home.tpl', [
+        return Response::html($this->view->render('pages/home.tpl', [
             'page_title' => 'Blog — статьи о разработке и продукте',
             'categories' => $categories,
-        ]);
+        ]));
     }
 
-    public function category(string $slug): void
+    public function category(string $slug): Response
     {
         $category = $this->blog->categoryBySlug($slug);
 
         if ($category === null) {
-            $this->errors->pageNotFound();
-
-            return;
+            return $this->errors->pageNotFound();
         }
 
         $sort = $this->resolveSort();
@@ -58,23 +57,21 @@ final class BlogController
             self::POSTS_PER_PAGE,
         );
 
-        $this->view->render('pages/category.tpl', [
+        return Response::html($this->view->render('pages/category.tpl', [
             'page_title' => $category['name'] . ' — Blog',
             'category' => $category,
             'posts' => $posts,
             'sort' => $sort,
             'pagination' => $this->buildPagination($page, $totalPages),
-        ]);
+        ]));
     }
 
-    public function post(string $slug): void
+    public function post(string $slug): Response
     {
         $post = $this->blog->postBySlug($slug);
 
         if ($post === null) {
-            $this->errors->pageNotFound();
-
-            return;
+            return $this->errors->pageNotFound();
         }
 
         $postId = (int) $post['id'];
@@ -83,11 +80,11 @@ final class BlogController
         $post['views'] = $this->trackViewOncePerSession($postId, (int) $post['views']);
         $post['categories'] = $this->blog->categoriesForPost($postId);
 
-        $this->view->render('pages/post.tpl', [
+        return Response::html($this->view->render('pages/post.tpl', [
             'page_title' => $post['title'] . ' — AbeloHost Blog',
             'post' => $post,
             'similar_posts' => $this->blog->similarPosts($postId, self::SIMILAR_POSTS_LIMIT),
-        ]);
+        ]));
     }
 
     private function trackViewOncePerSession(int $postId, int $currentViews): int

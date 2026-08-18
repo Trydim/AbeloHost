@@ -7,6 +7,7 @@ namespace Kernel;
 use Kernel\Container\Container;
 use Kernel\Controller\ErrorController;
 use Kernel\Http\Request;
+use Kernel\Http\Response;
 use Kernel\Route\Route;
 use RuntimeException;
 use Throwable;
@@ -51,20 +52,27 @@ final class Kernel
     public function create(): void
     {
         try {
-            $request = $this->get(Request::class);
+            $request  = $this->get(Request::class);
+            $response = $this->router->dispatch($request->method(), $request->path());
 
-            $result = $this->router->dispatch($request->method(), $request->path());
-
-            if (!$result) {
+            if ($response === null) {
                 $controller = $this->get(ErrorController::class);
-                $controller->pageNotFound();
+                $response   = $controller->pageNotFound();
             }
         } catch (Throwable $exception) {
             error_log((string) $exception);
 
-            $controller = $this->get(ErrorController::class);
-            $controller->pageServerError();
+            try {
+                $controller = $this->get(ErrorController::class);
+                $response   = $controller->pageServerError();
+            } catch (Throwable $renderException) {
+                error_log((string) $renderException);
+
+                $response = Response::text('Internal Server Error', 500);
+            }
         }
+
+        $response->send();
     }
 
     public function configure(callable $configurator): self

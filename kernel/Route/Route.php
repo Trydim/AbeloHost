@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kernel\Route;
 
 use Kernel\Container\Container;
+use Kernel\Http\Response;
 use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
@@ -29,7 +30,7 @@ final class Route
         return $this;
     }
 
-    public function dispatch(string $method, string $path): bool
+    public function dispatch(string $method, string $path): ?Response
     {
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
@@ -42,18 +43,16 @@ final class Route
                 continue;
             }
 
-            $this->invoke($route['action'], $parameters);
-
-            return true;
+            return $this->invoke($route['action'], $parameters);
         }
 
-        return false;
+        return null;
     }
 
     /**
      * @throws \ReflectionException
      */
-    private function invoke(array $action, array $routeParameters): void
+    private function invoke(array $action, array $routeParameters): Response
     {
         $controller = $this->container->get($action[0]);
         $method = new ReflectionMethod($controller, $action[1]);
@@ -90,7 +89,15 @@ final class Route
             );
         }
 
-        $method->invokeArgs($controller, $arguments);
+        $response = $method->invokeArgs($controller, $arguments);
+
+        if (!$response instanceof Response) {
+            throw new RuntimeException(
+                "Controller method {$action[1]} must return an HTTP response.",
+            );
+        }
+
+        return $response;
     }
 
     /** @return array<string, string>|null */

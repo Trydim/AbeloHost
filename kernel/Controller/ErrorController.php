@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kernel\Controller;
 
+use Kernel\Http\Response;
 use Kernel\View\View;
 
 class ErrorController
@@ -13,16 +14,18 @@ class ErrorController
     }
 
     /** @noinspection PhpUnused */
-    public function pageNotFound(): void
+    public function pageNotFound(): Response
     {
-        http_response_code(404);
-        $this->view->render("pages/404.tpl");
+        return Response::html($this->view->render('pages/404.tpl', [
+            'page_title' => 'Страница не найдена — AbeloHost Blog',
+        ]), 404);
     }
 
     /** @noinspection PhpUnused */
-    public function pageServerError(): void
+    public function pageServerError(): Response
     {
-        http_response_code(500);
-        $this->view->render("pages/500.tpl");
+        return Response::html($this->view->render('pages/500.tpl', [
+            'page_title' => 'Ошибка сервера — AbeloHost Blog',
+        ]), 500);
     }
 }

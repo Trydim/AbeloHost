@@ -28,9 +28,10 @@ final class View
     /**
      * @throws Exception
      */
-    public function render(string $template, array $data = []): void
+    public function render(string $template, array $data = []): string
     {
         $this->smarty->assign($data);
-        $this->smarty->display($template);
+
+        return $this->smarty->fetch($template);
     }
 }
