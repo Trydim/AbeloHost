@@ -4,39 +4,35 @@ declare(strict_types=1);
 
 namespace Kernel;
 
-
 use Kernel\Container\Container;
 use Kernel\Controller\ErrorController;
-use Kernel\DB\Database;
 use Kernel\Http\Request;
 use Kernel\Route\Route;
-use PDO;
 use RuntimeException;
 use Throwable;
 
 final class Kernel
 {
+    public string $basePath;
+
     private static ?self $instance = null;
 
     private Container $container;
 
     private Route $router;
 
-    public string $basePath;
+    private bool $configured = false;
 
     private function __construct(string $basePath)
     {
         $this->basePath  = $basePath;
         $this->container = new Container();
+        $this->router    = new Route($this->container);
+
         $this->container->singleton(
             self::class,
             fn (Container $_): self => $this
         );
-
-        $this->router = new Route($this->container);
-
-        $this->configure();
-        $this->loadRoutes();
     }
 
     public static function getInstance(): self
@@ -71,16 +67,15 @@ final class Kernel
         }
     }
 
-    private function configure(): self
+    public function configure(callable $configurator): self
     {
-        $this->container->singleton(
-            PDO::class,
-            static fn (): PDO => Database::connect(),
-        );
-        $this->container->singleton(
-            Request::class,
-            static fn (): Request => Request::fromGlobals(),
-        );
+        if ($this->configured) {
+            throw new LogicException('The kernel is already configured.');
+        }
+
+        $configurator($this->container);
+        $this->loadRoutes();
+        $this->configured = true;
 
         return $this;
     }

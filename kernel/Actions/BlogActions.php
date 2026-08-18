@@ -40,7 +40,7 @@ final class BlogActions
                             ORDER BY p.published_at DESC, p.id DESC
                         ) AS post_position
                  FROM posts p
-                 INNER JOIN post_categories pc ON pc.post_id = p.id
+                 JOIN post_categories pc ON pc.post_id = p.id
                  WHERE p.deleted_at IS NULL
              )
              SELECT c.id AS category_id,
@@ -55,9 +55,7 @@ final class BlogActions
                     rp.views AS post_views,
                     rp.published_at AS post_published_at
              FROM categories c
-             INNER JOIN ranked_posts rp
-                 ON rp.category_id = c.id
-                AND rp.post_position <= :limit
+             JOIN ranked_posts rp ON rp.category_id = c.id AND rp.post_position <= :limit
              WHERE c.deleted_at IS NULL
              ORDER BY c.name, rp.published_at DESC, rp.id DESC',
         );
@@ -80,14 +78,11 @@ final class BlogActions
                     (
                         SELECT COUNT(*)
                         FROM post_categories pc
-                        INNER JOIN posts p
-                            ON p.id = pc.post_id
-                           AND p.deleted_at IS NULL
+                        JOIN posts p ON p.id = pc.post_id AND p.deleted_at IS NULL
                         WHERE pc.category_id = c.id
                     ) AS post_count
              FROM categories c
-             WHERE c.slug = :slug
-               AND c.deleted_at IS NULL
+             WHERE c.slug = :slug AND c.deleted_at IS NULL
              LIMIT 1',
         );
         $statement->execute(['slug' => $slug]);
@@ -118,9 +113,8 @@ final class BlogActions
                     p.views,
                     p.published_at
              FROM posts p
-             INNER JOIN post_categories pc ON pc.post_id = p.id
-             WHERE pc.category_id = :categoryId
-               AND p.deleted_at IS NULL
+             JOIN post_categories pc ON pc.post_id = p.id
+             WHERE pc.category_id = :categoryId AND p.deleted_at IS NULL
              ORDER BY {$orderBy}
              LIMIT :limit OFFSET :offset",
         );
@@ -147,8 +141,7 @@ final class BlogActions
                     views,
                     published_at
              FROM posts
-             WHERE slug = :slug
-               AND deleted_at IS NULL
+             WHERE slug = :slug AND deleted_at IS NULL
              LIMIT 1',
         );
         $statement->execute(['slug' => $slug]);
@@ -167,9 +160,8 @@ final class BlogActions
         $statement = $this->pdo->prepare(
             'SELECT c.id, c.name, c.slug
              FROM categories c
-             INNER JOIN post_categories pc ON pc.category_id = c.id
-             WHERE pc.post_id = :postId
-               AND c.deleted_at IS NULL
+             JOIN post_categories pc ON pc.category_id = c.id
+             WHERE pc.post_id = :postId AND c.deleted_at IS NULL
              ORDER BY c.name',
         );
         $statement->bindValue(':postId', $postId, PDO::PARAM_INT);
@@ -185,8 +177,7 @@ final class BlogActions
         $statement = $this->pdo->prepare(
             'UPDATE posts
              SET views = views + 1
-             WHERE id = :postId
-               AND deleted_at IS NULL',
+             WHERE id = :postId AND deleted_at IS NULL',
         );
         $statement->bindValue(':postId', $postId, PDO::PARAM_INT);
         $statement->execute();
@@ -210,15 +201,10 @@ final class BlogActions
                     p.published_at,
                     COUNT(DISTINCT pc.category_id) AS shared_categories
              FROM posts p
-             INNER JOIN post_categories pc ON pc.post_id = p.id
-             INNER JOIN categories c
-                 ON c.id = pc.category_id
-                AND c.deleted_at IS NULL
-             INNER JOIN post_categories current_pc
-                 ON current_pc.category_id = pc.category_id
-                AND current_pc.post_id = :sourcePostId
-             WHERE p.id != :postId
-               AND p.deleted_at IS NULL
+             JOIN post_categories pc ON pc.post_id = p.id
+             JOIN categories c ON c.id = pc.category_id AND c.deleted_at IS NULL
+             JOIN post_categories current_pc ON current_pc.category_id = pc.category_id AND current_pc.post_id = :sourcePostId
+             WHERE p.id != :postId AND p.deleted_at IS NULL
              GROUP BY p.id,
                       p.title,
                       p.slug,

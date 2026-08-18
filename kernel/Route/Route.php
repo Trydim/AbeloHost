@@ -22,7 +22,7 @@ final class Route
     {
         $this->routes[] = [
             'method' => 'GET',
-            'path' => $path,
+            'path'   => $path,
             'action' => $action,
         ];
 

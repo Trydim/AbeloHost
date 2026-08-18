@@ -1,4 +1,4 @@
-FROM php:8.5-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache icu-libs libzip unzip \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev linux-headers \

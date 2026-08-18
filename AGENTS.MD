@@ -11,9 +11,9 @@ The complete functional specification is in `Plan.md`; read it before starting a
 ```text
 public/index.php                  # Front controller
 database/
-  migrations/*.sql                # SQL migrations
-  migrations/migrate.php          # Runner for all SQL migrations
-  seeders/seed.php                # Idempotent seeder
+  migrations/[0-9]*.php           # Versioned PDO migration callbacks
+  migrations/migrate.php          # Migration runner; tracks schema_migrations
+  seeders/seed.php                # Idempotent PDO seeder
 kernel/                           # PHP backend, namespace Kernel\
   Kernel.php                      # Application singleton, configure() and request handling
   Container/Container.php         # DI container: get(), singleton(), autowiring
@@ -35,17 +35,23 @@ templates/                        # Smarty templates
 
 - Any change to `composer.json` requires updating `composer.lock` (`composer update --lock`) and checking `composer validate --strict`.
 - Use the `Kernel\` namespace; preserve the case of names and directories.
-
+- Keep SQL and PDO access in `kernel/Actions/`; controllers orchestrate requests and prepare view data.
+- Never execute database queries inside loops. Fetch data in bulk and group flat result rows in the controller when needed.
+- Validate and normalize request parameters before passing them to actions. Pagination is always one-based.
+- New migrations must be named with a unique numeric prefix, for example `002_add_index.php`, and return `callable(PDO $pdo): void`.
+- Applied migrations are recorded in `schema_migrations`. Never edit an applied migration; add a new version instead.
+- MySQL DDL implicitly commits, so do not assume that wrapping schema changes in a PDO transaction makes them atomic.
 
 ## Frontend Rules
 
 - Source files are located only in `src/scss/`.
+- Do not use the SCSS `&` selector. Write complete BEM, pseudo-class, and state selectors explicitly.
 
 ## Docker and Environment
 
-- Services: `php` (PHP-FPM), `nginx`, `db` (MySQL), one-off `init`, and profile-based `assets` (Node).
-- On creation/re-creation, `init` runs `composer install`, migrations, and the seeder; it then exits. `php` starts after `init` completes successfully.
-- `vendor` is in the `composer_vendor` named volume, not the local project directory. Do not rely on a local `vendor` directory inside the PHP container.
+- Services: `php` (PHP-FPM), `nginx`, `db` (MySQL), one-off `init`, one-off `assets-init`, and profile-based `assets` (Node).
+- On creation/re-creation, `init` runs Composer, migrations, and the seeder; `assets-init` runs `npm ci` and builds CSS. Both then exit successfully before their dependent long-running services start.
+- `vendor` and `node_modules` use the `composer_vendor` and `node_modules` named volumes. Do not rely on local dependency directories inside containers.
 - PHP does not read `.env` and does not require dotenv. Docker Compose can read `.env` for variable substitution and passes values to containers; PHP receives them via `getenv()`.
 - `.env.example` is only a template and is not loaded automatically. Do not commit `.env` or real secrets.
 - Xdebug is installed in the image. If `.env` is absent, `XDEBUG_MODE` defaults to `off`; Xdebug is always disabled for `init`. Keep `XDEBUG_MODE=off` in production.
