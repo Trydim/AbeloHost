@@ -6,6 +6,7 @@ namespace Kernel;
 
 use Kernel\Container\Container;
 use Kernel\Controller\ErrorController;
+use Kernel\Http\Exception\NotFoundHttpException;
 use Kernel\Http\Request;
 use Kernel\Http\Response;
 use Kernel\Route\Route;
@@ -59,6 +60,9 @@ final class Kernel
                 $controller = $this->get(ErrorController::class);
                 $response   = $controller->pageNotFound();
             }
+        } catch (NotFoundHttpException) {
+            $controller = $this->get(ErrorController::class);
+            $response   = $controller->pageNotFound();
         } catch (Throwable $exception) {
             error_log((string) $exception);
 

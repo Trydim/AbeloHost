@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kernel\Controller;
 
 use Kernel\Actions\BlogActions;
+use Kernel\Http\Exception\NotFoundHttpException;
 use Kernel\Http\Request;
 use Kernel\Http\Response;
 use Kernel\View\View;
@@ -22,7 +23,6 @@ final class BlogController
         private readonly BlogActions $blog,
         private readonly View $view,
         private readonly Request $request,
-        private readonly ErrorController $errors,
     ) {
     }
 
@@ -43,7 +43,7 @@ final class BlogController
         $category = $this->blog->categoryBySlug($slug);
 
         if ($category === null) {
-            return $this->errors->pageNotFound();
+            throw new NotFoundHttpException();
         }
 
         $sort = $this->resolveSort();
@@ -71,7 +71,7 @@ final class BlogController
         $post = $this->blog->postBySlug($slug);
 
         if ($post === null) {
-            return $this->errors->pageNotFound();
+            throw new NotFoundHttpException();
         }
 
         $postId = (int) $post['id'];
