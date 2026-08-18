@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: abelohost
+      DB_USERNAME: abelohost
+      DB_PASSWORD: secret
+      XDEBUG_MODE: off
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: abelohost
+          MYSQL_USER: abelohost
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: pdo_mysql
+          coverage: none
+
+      - name: Validate Composer manifest
+        run: composer validate --strict
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Check PHP syntax
+        run: find kernel database public routes -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Apply migrations and seed database
+        run: |
+          php database/migrations/migrate.php
+          php database/seeders/seed.php
+
+      - name: Smoke-test HTTP routes
+        run: |
+          php -S 127.0.0.1:8080 -t public public/index.php > /tmp/php-server.log 2>&1 &
+          for attempt in {1..10}; do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:8080/; then
+              break
+            fi
+            echo "Waiting for PHP server, attempt ${attempt}"
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/ | grep -F 'Разработка'
+          curl --fail --silent 'http://127.0.0.1:8080/category/development?sort=popular&page=2' | grep -F 'Компонентный подход к интерфейсу'
+          curl --fail --silent http://127.0.0.1:8080/post/kak-nachat-proekt-na-chistom-php | grep -F 'Читайте также'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/not-found)" = '404'
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build CSS
+        run: npm run build:css
+
+      - name: Ensure CSS was built
+        run: test -s public/assets/css/main.css

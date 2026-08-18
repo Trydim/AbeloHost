@@ -1,0 +1,55 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name ${APP_DOMAIN};
+    server_tokens off;
+    more_clear_headers Server X-Powered-By;
+
+    return 308 https://${APP_DOMAIN}$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    http2 on;
+
+    server_name ${APP_DOMAIN};
+    server_tokens off;
+
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:TLS:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    root /var/www/html/public;
+    index index.php;
+
+    charset utf-8;
+    client_max_body_size 10m;
+
+    include /etc/nginx/conf.d/security-headers.inc;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /index.php {
+        include fastcgi_params;
+        fastcgi_pass php:9000;
+        fastcgi_hide_header X-Powered-By;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param HTTPS on;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
