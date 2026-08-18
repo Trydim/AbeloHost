@@ -15,6 +15,7 @@ final class BlogController
     private const PAGINATION_RADIUS = 2;
     private const SORT_LATEST = 'latest';
     private const SORT_POPULAR = 'popular';
+    private const VIEWED_POSTS_SESSION_KEY = 'viewed_posts';
 
     public function __construct(
         private readonly BlogActions $blog,
@@ -78,10 +79,8 @@ final class BlogController
 
         $postId = (int) $post['id'];
 
-        $this->blog->incrementViews($postId);
-
         $post['id'] = $postId;
-        $post['views'] = (int) $post['views'] + 1;
+        $post['views'] = $this->trackViewOncePerSession($postId, (int) $post['views']);
         $post['categories'] = $this->blog->categoriesForPost($postId);
 
         $this->view->render('pages/post.tpl', [
@@ -89,6 +88,26 @@ final class BlogController
             'post' => $post,
             'similar_posts' => $this->blog->similarPosts($postId, self::SIMILAR_POSTS_LIMIT),
         ]);
+    }
+
+    private function trackViewOncePerSession(int $postId, int $currentViews): int
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(['cookie_httponly' => true]);
+        }
+
+        $viewedPosts = $_SESSION[self::VIEWED_POSTS_SESSION_KEY] ?? [];
+
+        if (isset($viewedPosts[$postId])) {
+            return $currentViews;
+        }
+
+        $this->blog->incrementViews($postId);
+
+        $viewedPosts[$postId] = time();
+        $_SESSION[self::VIEWED_POSTS_SESSION_KEY] = $viewedPosts;
+
+        return $currentViews + 1;
     }
 
     /**
@@ -165,10 +184,10 @@ final class BlogController
 
         return [
             'current_page' => $page,
-            'total_pages' => $totalPages,
+            'total_pages'  => $totalPages,
             'has_previous' => $page > 1,
-            'has_next' => $page < $totalPages,
-            'pages' => range($firstPage, $lastPage),
+            'has_next'     => $page < $totalPages,
+            'pages'        => range($firstPage, $lastPage),
         ];
     }
 }
