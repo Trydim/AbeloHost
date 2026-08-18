@@ -1,0 +1,21 @@
+@use "../abstract/variables" as *;
+@use "../mixins/func" as *;
+
+.error-page {
+  max-width: 800px;
+  margin: 2.5rem auto 2rem;
+
+  h1 {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(2rem, 5vw, 4rem);
+  }
+
+  p {
+    color: $font-muted;
+    font-size: rem(18);
+  }
+
+  .button {
+    margin-top: 1.5rem;
+  }
+}

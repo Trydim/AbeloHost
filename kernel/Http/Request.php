@@ -32,4 +32,11 @@ final class Request
 
         return rtrim($path, '/') ?: '/';
     }
+
+    public function getString(string $key, string $default = ''): string
+    {
+        $value = $this->query[$key] ?? $default;
+
+        return is_string($value) ? $value : $default;
+    }
 }

@@ -24,7 +24,7 @@
   },
   "scripts": {
     "docker:up": [
-      "docker compose up"
+      "docker compose up -d"
     ]
   }
 }

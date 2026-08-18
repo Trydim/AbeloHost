@@ -1,0 +1,46 @@
+@use "../abstract/variables" as *;
+@use "../mixins/func";
+
+
+.page-heading {
+  margin: 2.5rem 0 2rem;
+
+  h1 {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(2.2rem, 5vw, 4.25rem);
+    line-height: 1.15;
+  }
+}
+
+.page-heading__lead {
+  color: $font-muted;
+  font-size: func.rem(18);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: func.rem(14);
+  color: $font-muted;
+}
+
+.sort-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sort-links__item {
+  padding: 8px 10px;
+  border-radius: $border-radius;
+  color: $font-muted;
+  font-weight: 600;
+
+  &:hover,
+  &.is-active {
+    color: $brand-color;
+    background: #eaf0ff;
+  }
+}
