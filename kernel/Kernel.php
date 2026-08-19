@@ -50,6 +50,10 @@ final class Kernel
         return $this->container->get($id);
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws Throwable
+     */
     public function create(): void
     {
         try {
@@ -65,6 +69,10 @@ final class Kernel
             $response   = $controller->pageNotFound();
         } catch (Throwable $exception) {
             error_log((string) $exception);
+
+            if (!$this->isProduction()) {
+                throw $exception;
+            }
 
             try {
                 $controller = $this->get(ErrorController::class);
@@ -90,6 +98,11 @@ final class Kernel
         $this->configured = true;
 
         return $this;
+    }
+
+    private function isProduction(): bool
+    {
+        return getenv('APP_ENV') === 'production';
     }
 
     private function loadRoutes(): void

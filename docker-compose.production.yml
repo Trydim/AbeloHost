@@ -1,4 +1,10 @@
 services:
+  php:
+    environment:
+      APP_ENV: production
+      XDEBUG_MODE: "off"
+      XDEBUG_START_WITH_REQUEST: "no"
+
   nginx:
     environment:
       APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN to the public hostname}

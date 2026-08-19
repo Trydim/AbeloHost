@@ -23,8 +23,17 @@
     ]
   },
   "scripts": {
+    "docker:upBuild": [
+      "docker compose up --build -d"
+    ],
     "docker:up": [
       "docker compose up -d"
+    ],
+    "docker:down": [
+      "docker compose down"
+    ],
+    "docker:downFull": [
+      "docker compose down -v"
     ]
   }
 }
