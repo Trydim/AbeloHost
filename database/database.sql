@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS post_categories (
     category_id INT UNSIGNED NOT NULL,
 
     PRIMARY KEY (post_id, category_id),
+    KEY post_categories_category_id_index (category_id),
     CONSTRAINT post_categories_post_id_foreign
         FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
     CONSTRAINT post_categories_category_id_foreign
