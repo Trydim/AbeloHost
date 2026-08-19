@@ -65,7 +65,9 @@ final readonly class Response
         return $this->status;
     }
 
-    /** @return array<string, string> */
+    /**
+     * @return array<string, string>
+     */
     public function headers(): array
     {
         return $this->headers;

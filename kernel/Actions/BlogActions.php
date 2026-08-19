@@ -199,19 +199,14 @@ final class BlogActions
                     p.description,
                     p.views,
                     p.published_at,
-                    COUNT(DISTINCT pc.category_id) AS shared_categories
+                    COUNT(*) AS shared_categories
              FROM posts p
              JOIN post_categories pc ON pc.post_id = p.id
              JOIN categories c ON c.id = pc.category_id AND c.deleted_at IS NULL
-             JOIN post_categories current_pc ON current_pc.category_id = pc.category_id AND current_pc.post_id = :sourcePostId
+             JOIN post_categories current_pc
+                 ON current_pc.category_id = pc.category_id AND current_pc.post_id = :sourcePostId
              WHERE p.id != :postId AND p.deleted_at IS NULL
-             GROUP BY p.id,
-                      p.title,
-                      p.slug,
-                      p.image,
-                      p.description,
-                      p.views,
-                      p.published_at
+             GROUP BY p.id
              ORDER BY shared_categories DESC, p.published_at DESC, p.id DESC
              LIMIT :limit',
         );

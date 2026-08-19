@@ -8,6 +8,7 @@ use Kernel\Actions\BlogActions;
 use Kernel\Http\Exception\NotFoundHttpException;
 use Kernel\Http\Request;
 use Kernel\Http\Response;
+use Kernel\Service\PostView;
 use Kernel\View\View;
 
 final class BlogController
@@ -17,7 +18,6 @@ final class BlogController
     private const PAGINATION_RADIUS = 2;
     private const SORT_LATEST = 'latest';
     private const SORT_POPULAR = 'popular';
-    private const VIEWED_POSTS_SESSION_KEY = 'viewed_posts';
 
     public function __construct(
         private readonly BlogActions $blog,
@@ -33,7 +33,7 @@ final class BlogController
         );
 
         return Response::html($this->view->render('pages/home.tpl', [
-            'page_title' => 'Blog — статьи о разработке и продукте',
+            'page_title' => 'AbeloHost Blog — статьи о разработке и продукте',
             'categories' => $categories,
         ]));
     }
@@ -58,15 +58,15 @@ final class BlogController
         );
 
         return Response::html($this->view->render('pages/category.tpl', [
-            'page_title' => $category['name'] . ' — Blog',
-            'category' => $category,
-            'posts' => $posts,
-            'sort' => $sort,
+            'page_title' => $category['name'] . ' — AbeloHost Blog',
+            'category'   => $category,
+            'posts'      => $posts,
+            'sort'       => $sort,
             'pagination' => $this->buildPagination($page, $totalPages),
         ]));
     }
 
-    public function post(string $slug): Response
+    public function post(string $slug, PostView $postView): Response
     {
         $post = $this->blog->postBySlug($slug);
 
@@ -76,35 +76,15 @@ final class BlogController
 
         $postId = (int) $post['id'];
 
-        $post['id'] = $postId;
-        $post['views'] = $this->trackViewOncePerSession($postId, (int) $post['views']);
+        $post['id']    = $postId;
+        $post['views'] = $postView->trackOncePerSession($postId, (int) $post['views']);
         $post['categories'] = $this->blog->categoriesForPost($postId);
 
         return Response::html($this->view->render('pages/post.tpl', [
-            'page_title' => $post['title'] . ' — AbeloHost Blog',
-            'post' => $post,
+            'page_title'    => $post['title'] . ' — AbeloHost Blog',
+            'post'          => $post,
             'similar_posts' => $this->blog->similarPosts($postId, self::SIMILAR_POSTS_LIMIT),
         ]));
-    }
-
-    private function trackViewOncePerSession(int $postId, int $currentViews): int
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(['cookie_httponly' => true]);
-        }
-
-        $viewedPosts = $_SESSION[self::VIEWED_POSTS_SESSION_KEY] ?? [];
-
-        if (isset($viewedPosts[$postId])) {
-            return $currentViews;
-        }
-
-        $this->blog->incrementViews($postId);
-
-        $viewedPosts[$postId] = time();
-        $_SESSION[self::VIEWED_POSTS_SESSION_KEY] = $viewedPosts;
-
-        return $currentViews + 1;
     }
 
     /**
@@ -120,21 +100,21 @@ final class BlogController
 
             if (!isset($categories[$categoryId])) {
                 $categories[$categoryId] = [
-                    'id' => $categoryId,
-                    'name' => $row['category_name'],
-                    'slug' => $row['category_slug'],
+                    'id'          => $categoryId,
+                    'name'        => $row['category_name'],
+                    'slug'        => $row['category_slug'],
                     'description' => $row['category_description'],
-                    'posts' => [],
+                    'posts'       => [],
                 ];
             }
 
             $categories[$categoryId]['posts'][] = [
-                'id' => (int) $row['post_id'],
-                'title' => $row['post_title'],
-                'slug' => $row['post_slug'],
-                'image' => $row['post_image'],
-                'description' => $row['post_description'],
-                'views' => (int) $row['post_views'],
+                'id'           => (int)$row['post_id'],
+                'title'        => $row['post_title'],
+                'slug'         => $row['post_slug'],
+                'image'        => $row['post_image'],
+                'description'  => $row['post_description'],
+                'views'        => (int)$row['post_views'],
                 'published_at' => $row['post_published_at'],
             ];
         }
